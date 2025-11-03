@@ -8,7 +8,7 @@
  */
 
 // For demo purposes, API key is embedded. In production, use backend proxy.
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAhpLuOcCUjToJTmn1zWA47R9mfQcge18M'
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDVSp6CzHmPPfSw6jhLkuC_N5GDxTQ9fik'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent'
 
 export interface ProcessImageRequest {
