@@ -2,6 +2,12 @@
 
 A professional 1-page admin panel for image editing using Google's Gemini 2.5 Flash Image API (code-named "Nano Banana"). This tool allows media teams to easily remove artifacts, unwanted objects, and imperfections from photos.
 
+## 🌐 Live Demo
+
+**Live site:** https://asyadev14.github.io/AI_testTask/
+
+✅ **Ready to use!** The demo includes an embedded API key for testing purposes. Just open the link and start using it!
+
 ## Features
 
 - 📤 **Upload Images** - Support for PNG, JPG, and other common formats
@@ -43,19 +49,20 @@ A professional 1-page admin panel for image editing using Google's Gemini 2.5 Fl
    npm install
    ```
 
-3. **Configure API Key**
-   
-   Get your free API key from [Google AI Studio](https://aistudio.google.com/apikey)
-   
-   Then create a `.env` file in the root directory:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and add your API key:
-   ```
-   VITE_GEMINI_API_KEY=your_actual_api_key_here
-   ```
+3. **Configure API Key (Optional)**
+
+   The app includes an embedded API key for demo purposes.
+
+   If you want to use your own key:
+   - Get your free API key from [Google AI Studio](https://aistudio.google.com/apikey)
+   - Create a `.env` file in the root directory:
+     ```bash
+     cp .env.example .env
+     ```
+   - Edit `.env` and add your API key:
+     ```
+     VITE_GEMINI_API_KEY=your_actual_api_key_here
+     ```
 
 4. **Start the development server**
    ```bash

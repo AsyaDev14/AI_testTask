@@ -7,7 +7,8 @@
  * Gemini uses "semantic masking" - instead of pixel masks, we describe what to remove
  */
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
+// For demo purposes, API key is embedded. In production, use backend proxy.
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAhpLuOcCUjToJTmn1zWA47R9mfQcge18M'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent'
 
 export interface ProcessImageRequest {
@@ -105,13 +106,7 @@ async function geminiProcessImage(
 export async function processImage(
   request: ProcessImageRequest
 ): Promise<ProcessImageResponse> {
-  if (!GEMINI_API_KEY) {
-    return {
-      success: false,
-      error: '🔑 API Key Missing\n\nPlease configure VITE_GEMINI_API_KEY in your .env file.\n\nGet your free API key at:\nhttps://aistudio.google.com/apikey'
-    }
-  }
-
+  // API key is embedded for demo purposes
   return geminiProcessImage(request)
 }
 
