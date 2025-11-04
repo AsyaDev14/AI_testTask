@@ -8,7 +8,7 @@ interface ImageComparisonProps {
 }
 
 export function ImageComparison({ beforeImage, afterImage, width, height }: ImageComparisonProps) {
-  const [sliderPosition, setSliderPosition] = useState(50) // percentage
+  const [sliderPosition, setSliderPosition] = useState(50)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 

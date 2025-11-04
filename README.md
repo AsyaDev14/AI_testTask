@@ -6,7 +6,10 @@ A professional 1-page admin panel for image editing using Google's Gemini 2.5 Fl
 
 **Live site:** https://asyadev14.github.io/AI_testTask/
 
-✅ **Ready to use!** The demo includes an embedded API key for testing purposes. Just open the link and start using it!
+⚠️ **Note:** The embedded API key may have limited quota. For best experience:
+1. Click the "🔑 Set API Key" button in the app
+2. Get your free API key from [Google AI Studio](https://aistudio.google.com/apikey)
+3. Enter your key and start editing!
 
 ## Features
 

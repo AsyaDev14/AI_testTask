@@ -13,13 +13,16 @@ function ImageEditor() {
   const [brushSize, setBrushSize] = useState(30)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isErasing, setIsErasing] = useState(false)
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false)
+  const [customApiKey, setCustomApiKey] = useState('')
+  const [savedApiKey, setSavedApiKey] = useState('')
+  const [tempApiKey, setTempApiKey] = useState('')
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const maskCanvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
 
-  // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -48,7 +51,6 @@ function ImageEditor() {
     reader.readAsDataURL(file)
   }
 
-  // Draw image on canvas when originalImage changes
   useEffect(() => {
     if (!originalImage || !imageRef.current) return
 
@@ -58,13 +60,11 @@ function ImageEditor() {
     if (canvas && maskCanvas) {
       const img = imageRef.current
 
-      // Set canvas size to match image
       const maxWidth = 800
       const maxHeight = 600
       let width = img.width
       let height = img.height
 
-      // Scale down if too large
       if (width > maxWidth || height > maxHeight) {
         const ratio = Math.min(maxWidth / width, maxHeight / height)
         width = Math.floor(width * ratio)
@@ -76,7 +76,6 @@ function ImageEditor() {
       maskCanvas.width = width
       maskCanvas.height = height
 
-      // Set canvas style to ensure visibility
       canvas.style.width = width + 'px'
       canvas.style.height = height + 'px'
       canvas.style.display = 'block'
@@ -89,7 +88,6 @@ function ImageEditor() {
         ctx.drawImage(img, 0, 0, width, height)
       }
 
-      // Clear mask
       const maskCtx = maskCanvas.getContext('2d')
       if (maskCtx) {
         maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height)
@@ -97,7 +95,6 @@ function ImageEditor() {
     }
   }, [originalImage])
 
-  // Drawing functions
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true)
     draw(e)
@@ -123,12 +120,10 @@ function ImageEditor() {
     let clientX: number, clientY: number
 
     if ('touches' in e) {
-      // Touch event
       if (e.touches.length === 0) return
       clientX = e.touches[0].clientX
       clientY = e.touches[0].clientY
     } else {
-      // Mouse event
       clientX = e.clientX
       clientY = e.clientY
     }
@@ -137,11 +132,9 @@ function ImageEditor() {
     const y = (clientY - rect.top) * scaleY
 
     if (isErasing) {
-      // Erase mode - use destination-out to remove mask
       ctx.globalCompositeOperation = 'destination-out'
       ctx.fillStyle = 'rgba(0, 0, 0, 1)'
     } else {
-      // Draw mode
       ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = 'rgba(255, 0, 0, 0.6)'
     }
@@ -151,7 +144,6 @@ function ImageEditor() {
     ctx.fill()
   }
 
-  // Clear mask
   const clearMask = () => {
     const canvas = maskCanvasRef.current
     if (!canvas) return
@@ -163,7 +155,6 @@ function ImageEditor() {
     setEditedImage(null)
   }
 
-  // Download result
   const downloadResult = () => {
     if (!editedImage) return
 
@@ -173,7 +164,6 @@ function ImageEditor() {
     link.click()
   }
 
-  // Process image with API
   const handleProcessImage = async () => {
     const canvas = canvasRef.current
     const maskCanvas = maskCanvasRef.current
@@ -183,33 +173,32 @@ function ImageEditor() {
     setIsProcessing(true)
 
     try {
-      // Convert canvases to base64
       const imageBase64 = canvasToBase64(canvas)
       const maskBase64 = createMaskFromCanvas(maskCanvas)
 
-      // Call API
       const response = await processImage({
         image: imageBase64,
         mask: maskBase64,
+        apiKey: savedApiKey || undefined,
       })
 
       if (response.success && response.processedImage) {
         setEditedImage(response.processedImage)
       } else {
-        // Better error handling
         let errorMessage = response.error || 'Unknown error'
 
-        if (errorMessage.includes('429') || errorMessage.includes('quota')) {
-          errorMessage = '⚠️ API Quota Exceeded\n\nYou have reached the free tier limit for today.\n\nOptions:\n1. Wait until tomorrow (quota resets daily)\n2. Upgrade to paid tier at https://ai.google.dev/pricing\n3. Use a different API key\n\nFree tier limits:\n• 15 requests per minute\n• 1500 requests per day'
+        if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
+          errorMessage = '⚠️ API Quota Exceeded\n\nThe API key has reached its limit.\n\nOptions:\n1. Use your own API key (click "🔑 Set API Key" button above)\n2. Wait until tomorrow (quota resets daily)\n3. Get a free key at: https://aistudio.google.com/apikey\n\nFree tier limits:\n• 15 requests per minute\n• 1500 requests per day'
+        } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key not valid')) {
+          errorMessage = '🔑 Invalid API Key\n\nThe provided API key is not valid.\n\nPlease:\n1. Click "🔑 Set API Key" button above\n2. Get a free key at: https://aistudio.google.com/apikey\n3. Enter your key and try again'
         } else if (errorMessage.includes('API key')) {
-          errorMessage = '🔑 API Key Error\n\nPlease check your API key in the .env file.\nGet a key at: https://aistudio.google.com/apikey'
+          errorMessage = '🔑 API Key Error\n\nPlease provide your own API key:\n1. Click "🔑 Set API Key" button above\n2. Get a free key at: https://aistudio.google.com/apikey'
         }
 
         alert(errorMessage)
       }
     } catch (error) {
-      console.error('Error processing image:', error)
-      alert('❌ Failed to process image. Please try again.\n\nCheck the console for details.')
+      alert('❌ Failed to process image. Please try again.')
     } finally {
       setIsProcessing(false)
     }
@@ -229,7 +218,47 @@ function ImageEditor() {
           <Button onClick={() => fileInputRef.current?.click()}>
             📁 Upload Image
           </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowApiKeyInput(!showApiKeyInput)
+              if (!showApiKeyInput) setTempApiKey(savedApiKey)
+            }}
+            className="text-xs"
+          >
+            {savedApiKey ? '🔑 ✓ Custom Key' : '🔑 Set API Key'}
+          </Button>
         </div>
+
+        {showApiKeyInput && (
+          <div className="w-full flex gap-2 items-center p-3 bg-[var(--color-background)] rounded border border-[var(--color-border)]">
+            <Label className="text-sm whitespace-nowrap">API Key:</Label>
+            <input
+              type="password"
+              value={tempApiKey}
+              onChange={(e) => setTempApiKey(e.target.value)}
+              placeholder="Enter your Google Gemini API key"
+              className="flex-1 px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open('https://aistudio.google.com/apikey', '_blank')}
+            >
+              Get Key
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSavedApiKey(tempApiKey)
+                setShowApiKeyInput(false)
+              }}
+              className="bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 text-white"
+            >
+              Save
+            </Button>
+          </div>
+        )}
 
         {originalImage && (
           <>
@@ -336,9 +365,6 @@ function ImageEditor() {
                     onTouchEnd={stopDrawing}
                   />
                 </div>
-              </div>
-              <div className="text-center text-xs text-[var(--color-muted-foreground)] py-2 bg-[var(--color-secondary)] rounded px-2">
-                💡 Mark the artifacts you want to remove with red mask
               </div>
             </div>
 

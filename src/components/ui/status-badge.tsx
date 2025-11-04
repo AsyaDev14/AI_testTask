@@ -16,4 +16,3 @@ export function StatusBadge({ children, variant = 'success' }: StatusBadgeProps)
     </span>
   )
 }
-
