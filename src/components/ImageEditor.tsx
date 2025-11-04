@@ -14,7 +14,6 @@ function ImageEditor() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isErasing, setIsErasing] = useState(false)
   const [showApiKeyInput, setShowApiKeyInput] = useState(false)
-  const [customApiKey, setCustomApiKey] = useState('')
   const [savedApiKey, setSavedApiKey] = useState('')
   const [tempApiKey, setTempApiKey] = useState('')
 
